@@ -1,0 +1,48 @@
+mcp.185.221.213.169.sslip.io {
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:8787
+}
+
+diary.avdeeva-ludmila.ru {
+	encode zstd gzip
+	request_body {
+		max_size 8MB
+	}
+	header X-Content-Type-Options nosniff
+	reverse_proxy 127.0.0.1:3300
+}
+
+# Activate only after broker verified bootstrap and DNS points to 185.221.213.169.
+analytics.avdeeva-ludmila.ru {
+	encode zstd gzip
+	header X-Content-Type-Options nosniff
+	reverse_proxy 127.0.0.1:3016
+}
+
+checklist.avdeeva-ludmila.ru, checklist.185.221.213.169.sslip.io {
+	encode zstd gzip
+	header X-Content-Type-Options nosniff
+
+	@nutriRoot path /nutri
+	redir @nutriRoot /nutri/ 308
+
+	handle_path /nutri/* {
+		root * /opt/checklists/nutri-automation/dist
+		try_files {path} /index.html
+		file_server
+	}
+
+	handle {
+		root * /opt/checklists/interactive-promotion/dist
+		try_files {path} /index.html
+		file_server
+	}
+}
+
+bot-audit.avdeeva-ludmila.ru, bot-checklist.185.221.213.169.sslip.io {
+	encode zstd gzip
+	root * /opt/checklists/bot-not-selling/dist
+	try_files {path} /index.html
+	header X-Content-Type-Options nosniff
+	file_server
+}
